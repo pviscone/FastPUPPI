@@ -83,6 +83,8 @@ process.out = cms.OutputModule("PoolOutputModule",
             "keep *_simHcalTriggerPrimitiveDigis_*_*",
             "keep *_simCaloStage2Layer1Digis_*_*",
             "keep *_simCaloStage2Digis_*_*",
+            "keep *_l1tPhase2L1CaloEGammaEmulator_*Clusters_*",
+            "keep *_l1tPhase2L1CaloEGammaEmulator_*Towers_*",
             # --- Muon TPs
             "keep *_simMuonRPCDigis_*_*",
             "keep *_simMuonGEMPadDigis_*_*",
