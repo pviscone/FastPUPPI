@@ -3,14 +3,14 @@ from Configuration.StandardSequences.Eras import eras
 
 process = cms.Process("IN", eras.Phase2C17I13M9)
 process.load('Configuration.StandardSequences.Services_cff')
-process.load('Configuration.Geometry.GeometryExtended2026D88Reco_cff')
-process.load('Configuration.Geometry.GeometryExtended2026D88_cff')
+process.load('Configuration.Geometry.GeometryExtended2026D95Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2026D95_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '125X_mcRun4_realistic_v2', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '131X_mcRun4_realistic_v9', '')
 
 process.load('SimCalorimetry.HcalTrigPrimProducers.hcaltpdigi_cff')
 process.load('CalibCalorimetry.CaloTPG.CaloTPGTranscoder_cfi')
@@ -20,14 +20,21 @@ process.load("L1Trigger.TrackFindingTracklet.L1HybridEmulationTracks_cff")
 process.load("L1Trigger.TrackTrigger.ProducerSetup_cff") 
 process.load("L1Trigger.TrackerDTC.ProducerED_cff") 
 process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
+process.load('L1Trigger.L1THGCal.hgcalTriggerPrimitives_cff')
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('/store/mc/Phase2Fall22DRMiniAOD/TT_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW-MINIAOD/PU200_125X_mcRun4_realistic_v2_ext1-v1/30000/1013a985-0115-4020-a601-93f09566471c.root'),
+    fileNames = cms.untracked.vstring(
+        # 'file:/data/cerminar/Phase2Spring23DIGIRECOMiniAOD/DoubleElectron_FlatPt-1To100-gun/GEN-SIM-DIGI-RAW-MINIAOD/PU200_Trk1GeV_131X_mcRun4_realistic_v5-v1/c699a773-9875-40c9-83b7-5a3c27f90bfd.root',
+        '/store/mc/Phase2Spring23DIGIRECOMiniAOD/DYToLL_M-10To50_TuneCP5_14TeV-pythia8/GEN-SIM-DIGI-RAW-MINIAOD/PU200_Trk1GeV_131X_mcRun4_realistic_v5-v1/30000/0289a719-64c3-4b16-871f-da7db9a8ac88.root',        '/store/mc/Phase2Spring23DIGIRECOMiniAOD/MinBias_TuneCP5_14TeV-pythia8/GEN-SIM-DIGI-RAW-MINIAOD/PU200_Trk1GeV_131X_mcRun4_realistic_v5-v1/30002/3b44d52d-1807-4a4f-9b9b-19466303a741.root',
+),
+
     inputCommands = cms.untracked.vstring(
         'keep *',
         'drop l1tPFJets_*_*_*',
         'drop l1tPFTaus_*_*_*',
-        'drop l1tTrackerMuons_*_*_*'
+        'drop l1tTrackerMuons_*_*_*',
+        'drop *_hlt*_*_HLT',
+        'drop triggerTriggerFilterObjectWithRefs_*_*_HLT'
     ),
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200))
@@ -39,6 +46,7 @@ process.options = cms.untracked.PSet(
 
 process.PFInputsTask = cms.Task(
     process.L1TLayer1TaskInputsTask,
+    process.L1THGCalTriggerPrimitivesTask,
    #process.TTClustersFromPhase2TrackerDigis,
    #process.TTStubsFromPhase2TrackerDigis,
    #process.TrackerDTCProducer,
@@ -49,8 +57,6 @@ process.PFInputsTask = cms.Task(
    #process.TTTrackAssociatorFromPixelDigisExtended,
    #process.SimL1EmulatorTask
    #process.l1tTkStubsGmt,
-   process.l1tTkMuonsGmt,
-   process.l1tSAMuonsGmt
 )
 process.p = cms.Path(
         process.l1tLayer1 +
@@ -58,9 +64,10 @@ process.p = cms.Path(
         process.l1tLayer2EG
 )
 process.p.associate(process.PFInputsTask)
+process.p.associate(process.SimL1EmulatorTask)
 
 process.out = cms.OutputModule("PoolOutputModule",
-        fileName = cms.untracked.string("inputs125X.root"),
+        fileName = cms.untracked.string("inputs131X.root"),
         outputCommands = cms.untracked.vstring("drop *",
             # --- GEN
             "keep *_genParticles_*_*",
@@ -72,6 +79,7 @@ process.out = cms.OutputModule("PoolOutputModule",
             "keep *_TTTrackAssociatorFromPixelDigis_*_*",
             "keep *_TTTrackAssociatorFromPixelDigisExtended_*_*",
             # --- Calo TPs
+            "keep *_simEcalEBTriggerPrimitiveDigis_*_*",
             "keep *_simHcalTriggerPrimitiveDigis_*_*",
             "keep *_simCaloStage2Layer1Digis_*_*",
             "keep *_simCaloStage2Digis_*_*",
@@ -115,6 +123,8 @@ process.out = cms.OutputModule("PoolOutputModule",
             "keep *_l1tTowerCalibration_*_*",
             "keep *_l1tCaloJet_*_*",
             "keep *_l1tCaloJetHTT_*_*",
+            # "keep *_l1tPhase2L1CaloEGammaEmulator_*_*",
+            # "keep *_l1tPhase2CaloPFClusterEmulator_*_*",
             # --- GTT reconstruction
             "keep *_l1tVertexFinder_*_*",
             "keep *_l1tVertexFinderEmulator_*_*",
@@ -129,8 +139,9 @@ process.out = cms.OutputModule("PoolOutputModule",
             "keep *_l1tTrackerEmuHTMiss_*_*",
             "keep *_l1tTrackerEmuHTMissExtended_*_*",
             # --- GMT reconstruction
-            "keep *_l1tTkStubsGmt_*_*",
-            "keep *_l1tTkMuonsGmt_*_*",
+            "keep *_l1tStubsGmt_*_*",
+            "keep *_l1tKMTFMuonsGmt_*_*",
+            "keep *_l1tFwdMuonsGmt_*_*",
             "keep *_l1tSAMuonsGmt_*_*",
         ),
         compressionAlgorithm = cms.untracked.string('LZMA'),

@@ -20,8 +20,8 @@ process.source = cms.Source("PoolSource",
             "drop l1tTkPrimaryVertexs_*_*_*")
 )
 
-process.load('Configuration.Geometry.GeometryExtended2026D88Reco_cff')
-process.load('Configuration.Geometry.GeometryExtended2026D88_cff')
+process.load('Configuration.Geometry.GeometryExtended2026D95Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2026D95_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.SimL1Emulator_cff')
 process.load('SimCalorimetry.HcalTrigPrimProducers.hcaltpdigi_cff') # needed to read HCal TPs
@@ -34,12 +34,16 @@ from RecoJets.JetProducers.ak4PFJets_cfi import ak4PFJets
 from RecoMET.METProducers.pfMet_cfi import pfMet
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '125X_mcRun4_realistic_v2', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '131X_mcRun4_realistic_v9', '')
 
 # NOTE: we need this to avoid saving the stubs
 process.l1tTrackSelectionProducer.processSimulatedTracks = False
 
+from L1Trigger.L1CaloTrigger.l1tPhase2L1CaloEGammaEmulator_cfi import l1tPhase2L1CaloEGammaEmulator
+process.l1tPhase2L1CaloEGammaEmulator = l1tPhase2L1CaloEGammaEmulator.clone()
+
 process.extraPFStuff = cms.Task(
+        process.l1tPhase2L1CaloEGammaEmulator,
         process.l1tSAMuonsGmt,
         process.l1tGTTInputProducer,
         process.l1tTrackSelectionProducer,
@@ -414,9 +418,39 @@ def addHGCalTPs():
                     layer90 = Var("layer90percent", float),
                     ntc67 = Var("triggerCells67percent", float),
                     ntc90 = Var("triggerCells90percent", float),
+                    varRR = Var("varRR", float),
+                    varZZ = Var("varZZ", float),
+                    varEtaEta = Var("varEtaEta", float),
+                    varPhiPhi = Var("varPhiPhi", float),
+                    first1layers = Var("first1layers", float),
+                    first3layers = Var("first3layers", float),
+                    first5layers = Var("first5layers", float),
+                    firstHcal1layers = Var("firstHcal1layers", float),
+                    firstHcal3layers = Var("firstHcal3layers", float),
+                    firstHcal5layers = Var("firstHcal5layers", float),
+                    last1layers = Var("last1layers", float),
+                    last3layers = Var("last3layers", float),
+                    last5layers = Var("last5layers", float),
+                    emax1layers = Var("emax1layers", float),
+                    emax3layers = Var("emax3layers", float),
+                    emax5layers = Var("emax5layers", float),
+                    eot = Var("eot", float),
+                    ebm0 = Var("ebm0", int),
+                    ebm1 = Var("ebm1", int),
+                    hbm = Var("hbm", int),
                     )
             )
-    process.extraPFStuff.add(process.hgcClusterTable)
+    from L1Trigger.Phase2L1ParticleFlow.l1tPFClustersFromHGC3DClusters_cfi import l1tPFClustersFromHGC3DClusters
+    from L1Trigger.L1THGCal.egammaIdentification import egamma_identification_histomax
+    process.hgcClusterExtTable = cms.EDProducer("L1HGC3DclTableProducer",
+                src = cms.InputTag('l1tHGCalBackEndLayer2Producer:HGCalBackendLayer2Processor3DClustering'),
+                cut  = cms.string("pt > 1"),
+                name = cms.string("HGCal3DCl"),
+                emVsPionID=l1tPFClustersFromHGC3DClusters.emVsPionID,
+                emVsPUID=l1tPFClustersFromHGC3DClusters.emVsPUID,
+                EGIdentification = egamma_identification_histomax.clone(),
+            )
+    process.extraPFStuff.add(process.hgcClusterTable, process.hgcClusterExtTable)
 
 
 def addPFLep(pdgs=[11,13,22],opts=["PF","Puppi"], postfix=""):
@@ -467,6 +501,33 @@ def addPFLep(pdgs=[11,13,22],opts=["PF","Puppi"], postfix=""):
                 setattr(process, w+"Ph"+postfix+"Table", phTable)
                 process.extraPFStuff.add(phTable)
 
+def addStaEG(postfix=""):        
+    def getStaEgTables(slice, postfix, inputtag):
+        staEgTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+                        name = cms.string("EGSta"+slice+postfix),
+                        src = cms.InputTag(inputtag),
+                        cut = cms.string(""),
+                        doc = cms.string(""),
+                        singleton = cms.bool(False), # the number of entries is variable
+                        extension = cms.bool(False), # this is the main table
+                        variables = cms.PSet(
+                            pt  = Var("pt",  float,precision=8),
+                            phi = Var("phi", float,precision=8),
+                            eta  = Var("eta", float,precision=8),
+                            hwQual    = Var("hwQual", int, doc="id"),
+                        )
+                    )
+        return staEgTable
+
+    staEgEBEmuTable = getStaEgTables('EB', postfix, f"l1tPhase2L1CaloEGammaEmulator:GCTEGammas")
+    setattr(process, "EGStaEBEmuTable", staEgEBEmuTable)
+    process.extraPFStuff.add(staEgEBEmuTable)
+
+    staEgEEEmuTable = getStaEgTables('EE', postfix, f"l1tLayer1EG:L1EgEE")
+    setattr(process, "EGStaEETable", staEgEEEmuTable)
+    process.extraPFStuff.add(staEgEEEmuTable)
+
+
 def addTkEG(doL1=False, doL2=True, postfix=""):        
     def getTkEgTables(slice, postfix, tkem_inputtag, tkele_inputtag):
         tkEmTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
@@ -480,7 +541,6 @@ def addTkEG(doL1=False, doL2=True, postfix=""):
                             pt  = Var("pt",  float,precision=8),
                             phi = Var("phi", float,precision=8),
                             eta  = Var("eta", float,precision=8),
-                            charge  = Var("charge", int, doc="charge"),
                             hwQual    = Var("hwQual", int, doc="id"),
                             tkIso   = Var("trkIsol", float, precision=8),
                             tkIsoPV  = Var("trkIsolPV", float, precision=8),
@@ -499,6 +559,8 @@ def addTkEG(doL1=False, doL2=True, postfix=""):
         tkEleTable.variables.tkEta = Var("trkPtr.eta", float,precision=8)
         tkEleTable.variables.tkPhi = Var("trkPtr.phi", float,precision=8)
         tkEleTable.variables.tkPt = Var("trkPtr.momentum.perp", float,precision=8)
+        tkEleTable.variables.caloEta = Var("egCaloPtr.eta", float,precision=8)
+        tkEleTable.variables.caloPhi = Var("egCaloPtr.phi", float,precision=8)
         return tkEmTable, tkEleTable
                                    
     if doL1:    
@@ -513,6 +575,34 @@ def addTkEG(doL1=False, doL2=True, postfix=""):
         setattr(process, "TkEmL2%sTable" % (postfix), tkEmTable)
         setattr(process, "TkEleL2%sTable" % (postfix), tkEleTable)
         process.extraPFStuff.add(tkEmTable,tkEleTable)
+
+
+def addDecodedTk(regs=['HGCal']):        
+    for reg in regs:
+        decTkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+                        name = cms.string("DecTk"+reg),
+                        src = cms.InputTag("l1tLayer1"+reg, 'DecodedTK'),
+                        cut = cms.string(""),
+                        doc = cms.string(""),
+                        singleton = cms.bool(False), # the number of entries is variable
+                        extension = cms.bool(False), # this is the main table
+                        variables = cms.PSet(
+                            pt  = Var("pt",  float,precision=8),
+                            phi = Var("phi", float,precision=8),
+                            eta  = Var("eta", float,precision=8),
+                            caloPhi = Var("caloPhi", float,precision=8),
+                            caloEta  = Var("caloEta", float,precision=8),
+                            vz = Var("vz", float,precision=8),
+                            chi2RPhi = Var("trackWord.getChi2RPhi", float,precision=8),
+                            chi2RZ = Var('trackWord.getChi2RZ', float, precision=8),
+                            chi2Bend = Var('trackWord.getBendChi2', float, precision=8),
+                            hitPattern = Var('trackWord.getHitPattern', int),
+                            nStubs = Var('trackWord.getNStubs', int),
+                            mvaQual = Var('trackWord.getMVAQuality', int),
+                        )
+                    )
+        setattr(process, f"decTk{reg}Table", decTkTable)
+        process.extraPFStuff.add(decTkTable)
 
 
 def addAllLeps():
