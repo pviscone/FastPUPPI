@@ -577,7 +577,7 @@ def addTkEG(doL1=False, doL2=True, postfix=""):
         process.extraPFStuff.add(tkEmTable,tkEleTable)
 
 
-def addDecodedTk(regs=['HGCal']):        
+def addDecodedTk(regs=['HGCal','Barrel']):        
     for reg in regs:
         decTkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
                         name = cms.string("DecTk"+reg),
@@ -654,6 +654,7 @@ def addAllLeps():
     addPFLep([13])
     addTkEG()
     addEGCrystalClusters()
+    addDecodedTk()
 
 def goGun(calib=1):
     process.ntuple.isParticleGun = True
