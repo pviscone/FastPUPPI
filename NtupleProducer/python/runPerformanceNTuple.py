@@ -654,7 +654,6 @@ def addAllLeps():
     addPFLep([13])
     addTkEG()
     addEGCrystalClusters()
-    addDecodedTk()
 
 def goGun(calib=1):
     process.ntuple.isParticleGun = True
