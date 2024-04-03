@@ -1,5 +1,14 @@
-Basic Instructions
+## Introduction
 
+FastPUPPI supports the creation of `NanoAOD`-like flat ntuples for performance analysis of the Correlator Trigger objects.
+The basic workflows comprises two steps:
+   1. "slim" input file creation;
+   2. ntuple step starting from the "slim" inputs.
+
+On top of this, the package contains several utilities and scripts for quick performance analysis workflows.
+
+
+## CMSSW area setup 
 ```
 cmsrel CMSSW_14_0_0_pre3
 cd CMSSW_14_0_0_pre3/src
@@ -19,7 +28,9 @@ git clone git@github.com:p2l1pfp/FastPUPPI.git -b 14_0_X
 scram b -j8
 ```
 
-If you start from GEN-SIM-DIGI-RAW, the first step is to produce the inputs files containing the basic TPs:
+## "Slim" input file creation
+
+If you start from GEN-SIM-DIGI-RAW, the first step is to produce the "slimmed" inputs files containing the basic TPs to be able to re-run the Correlator emulator:
 ```
 cd FastPUPPI/NtupleProducer/python/
 cmsRun runInputs131X.py OR
@@ -38,15 +49,24 @@ Existing input files available are:
  * `110X_v3`:  input files from processing `11_0_X` HLT TDR samples in `CMSSW_12_3_X`, from `/store/cmst3/group/l1tr/gpetrucc/12_3_X/NewInputs110X/220322`: use with `oldInputs_12_3_X()` in `runPerformanceNTuple.py`
  * `110X_v2`:  input files from processing `11_0_X` HLT TDR samples in `CMSSW_11_1_6`, from `/store/cmst3/group/l1tr/gpetrucc/11_1_0/NewInputs110X/110121.done`: use with `oldInputs_11_1_6()` in `runPerformanceNTuple.py`
 
-The second step runs the algorithms on the input files and creates ntuples which can be used to do analysis.
+Example configurations to run the input job via crab can be found in the [submission](https://github.com/cerminar/submission/) package via the configuration file:
+https://github.com/cerminar/submission/blob/master/submit_INFP_131X.yaml
+
+
+## Ntuple creation
+
+The second step runs the Correlator algorithms (via the emulator) on the input files and creates ntuples which can be used to do analysis.
 All python configuration files for CMSSW are under `NtupleProducer/python`, while standalone python scripts or fwlite macros are under `NtupleProducer/python/scripts`. 
 In order to run the python configuration file on many events locally, a driver script `scripts/prun.sh` can be used to run locally the python configuration files, which takes care of selecting the input files, splitting the task to run on multiple CPUs and merge the result.
 
-1) Ntuple for trigger rate studies:
+### Ntuple for trigger rate studies:
 
 ```
 cmsRun runPerformanceNTuple.py
 ```
+
+The configuration of the various `Nano-AOD` flat tables is steered via inline customization functions. Have a look to the `runPerformanceNTuple.py` for the details.
+
 
 To run the ntuplizer over many files, from within `NtupleProducer/python` do for instance:
 ```
@@ -54,13 +74,20 @@ To run the ntuplizer over many files, from within `NtupleProducer/python` do for
 ./scripts/prun.sh runPerformanceNTuple.py --125X_v0 DoubleElectron_FlatPt-1To100_PU200 DoubleElectron_FlatPt-1To100_PU200.125X_v0  --inline-customize 'goGun();'
 ./scripts/prun.sh runPerformanceNTuple.py --125X_v0 SinglePion_Pt-0To200-gun_PU0 SinglePion_Pt-0To200-gun_PU0.125X_v0  --inline-customize 'goGun();noPU()'
 ```
-Look into the prun.sh script to check the paths to the input files and the corresponding options.
+Look into the `prun.sh` script to check the paths to the input files and the corresponding options.
+
+Alternatively, you can use the CERN HT-Condor batch system. Example configurations can be found in the 
+[submission](https://github.com/cerminar/submission/) package via the configuration file:
+https://github.com/cerminar/submission/blob/master/submit_FP_131X.yaml
+
 
 NB: 
    * When processing samples where TPs were produced in `11_1_6` or `12_3_X`, add `--inline-customize oldInputs_11_1_6()` or `--inline-customize oldInputs_12_3_X()`
    * For samples without pileup, add  `--inline-customize 'noPU()'` to the prun.sh command line or add `noPU()` at the end of the file
    * For single particle samples `goGun()` (and if at PU0 also `noPU()`)
 
+
+## Plotting scripts
 
 The third step is to produce the plots from the ntuple. The plotting scripts are in:
 ```FastPUPPI/NtupleProducer/python/scripts```
