@@ -24,6 +24,9 @@ process.source = cms.Source(
         "drop l1tPFTracks_*_*_*",
         "drop l1tPFCandidates_*_*_*",
         "drop l1tTkPrimaryVertexs_*_*_*",
+        'drop l1tTrackerMuons_*_*_*',
+        'drop *_hlt*_*_HLT',
+        'drop triggerTriggerFilterObjectWithRefs_*_*_HLT'
     ),
 )
 
@@ -929,6 +932,9 @@ def addDecodedTk(regs=["HGCal", "Barrel"], truth=False):
         process.extraPFStuff.add(decTkTable)
 
         if truth:
+            warnings.warn(
+                "To make it work you have to change the digiSimLinks input tag of TTClusterAssociatorFromPixelDigis in SimTracker/TrackTriggerAssociation/python/TTClusterAssociation_cfi.py. \nIt must be ('simSiPixelDigis','Tracker'), not ('mix','Tracker')"
+            )
             warnings.warn("Truth track must be runned on RAW dataset")
             decTkTableExt = cms.EDProducer(
                 "L1DecTkTruthTableProducer",
