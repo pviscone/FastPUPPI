@@ -86,12 +86,12 @@ void L1DecTkTruthTableProducer::produce(edm::StreamID id, edm::Event& iEvent, co
     isReal[i] = tmp_isReal;
   }
 
-  out->addColumn<float>("isGenuine", isGenuine, "");
-  out->addColumn<float>("isLooselyGenuine", isLooselyGenuine, "");
-  out->addColumn<float>("isUnknown", isUnknown, "");
-  out->addColumn<float>("isCombinatoric", isCombinatoric, "");
-  out->addColumn<float>("isReal", isReal, "");
-  out->addColumn<float>("tpmatch", tpmatch, "");
+  out->addColumn<int>("isGenuine", isGenuine, "");
+  out->addColumn<int>("isLooselyGenuine", isLooselyGenuine, "");
+  out->addColumn<int>("isUnknown", isUnknown, "");
+  out->addColumn<int>("isCombinatoric", isCombinatoric, "");
+  out->addColumn<int>("isReal", isReal, "");
+  out->addColumn<int>("tpmatch", tpmatch, "");
 
   // save to the event branches
   iEvent.put(std::move(out));
