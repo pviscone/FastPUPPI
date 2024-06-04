@@ -641,20 +641,20 @@ def addEGCrystalClusters() -> None:
                                             pt  = Var("pt",  float,precision=8),
                                             eta  = Var("eta", float,precision=8),
                                             phi = Var("phi", float,precision=8),
-                                            calibratedPt = Var("calibratedPt", float,precision=8),
-                                            hovere = Var("hovere", float,precision=8),
-                                            puCorrPt = Var("puCorrPt", float,precision=8),
-                                            bremStrength = Var("bremStrength", float,precision=8),
-                                            e2x2 = Var("e2x2", float,precision=8),
                                             e2x5 = Var("e2x5", float,precision=8),
-                                            e3x5 = Var("e3x5", float,precision=8),
                                             e5x5 = Var("e5x5", float,precision=8),
-                                            standaloneWP = Var("standaloneWP", int,precision=8),
-                                            electronWP98 = Var("electronWP98", int,precision=8),
-                                            photonWP80 = Var("photonWP80", int,precision=8),
-                                            electronWP90 = Var("electronWP90", int,precision=8),
-                                            looseL1TkMatchWP = Var("looseL1TkMatchWP", int,precision=8),
-                                            stage2effMatch= Var("stage2effMatch", int,precision=8),
+                                            #calibratedPt = Var("calibratedPt", float,precision=8),
+                                            #hovere = Var("hovere", float,precision=8),
+                                            #puCorrPt = Var("puCorrPt", float,precision=8),
+                                            #bremStrength = Var("bremStrength", float,precision=8),
+                                            #e2x2 = Var("e2x2", float,precision=8),
+                                            #e3x5 = Var("e3x5", float,precision=8),
+                                            #standaloneWP = Var("standaloneWP", int,precision=8),
+                                            #electronWP98 = Var("electronWP98", int,precision=8),
+                                            #photonWP80 = Var("photonWP80", int,precision=8),
+                                            #electronWP90 = Var("electronWP90", int,precision=8),
+                                            #looseL1TkMatchWP = Var("looseL1TkMatchWP", int,precision=8),
+                                            #stage2effMatch= Var("stage2effMatch", int,precision=8),
                                         )
             )
         return CrystalClustersTable
@@ -667,6 +667,21 @@ def addEGCrystalClusters() -> None:
         flatTable = getCrystalClustersTable(nameSrcDict)
         setattr(process, f"{nameSrcDict['name']}Table", flatTable)
         process.extraPFStuff.add(flatTable)
+
+        if nameSrcDict["name"]=="CaloEGammaCrystalClustersGCT":
+            PFClusterExt=cms.EDProducer(
+                "L1PFClusterDigiParser",
+                name=cms.string("CaloEGammaCrystalClustersGCT"),
+                src=cms.InputTag("l1tPFClustersFromL1EGClusters:all"),
+                cut = cms.string(""),
+                doc = cms.string(""),
+                singleton = cms.bool(False), # the number of entries is variable
+                extension = cms.bool(True),
+                ),
+
+            setattr(process, 'PFClusterExtTable', PFClusterExt[0])
+            process.extraPFStuff.add(PFClusterExt[0])
+
 
 
 def addAllLeps():
