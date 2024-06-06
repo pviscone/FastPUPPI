@@ -34,14 +34,14 @@ bool passes_looseTkiso(uint64_t digiWord) { return (isoFlags(digiWord) & 0x2); }
 // e.g. 0b01 : standalone shower shape flag passed, loose Tk shower shape flag did not pass
 uint shapeFlags(uint64_t digiWord) { return ((digiWord >> 51) & 0x3); }
 
-uint passes_ss(uint64_t digiWord) { return (shapeFlags(digiWord) & 0x1); }         // standalone shower shape WP
-uint passes_looseTkss(uint64_t digiWord) { return (shapeFlags(digiWord) & 0x2); }  // loose Tk shower shape WP
+bool passes_ss(uint64_t digiWord) { return (shapeFlags(digiWord) & 0x1); }         // standalone shower shape WP
+bool passes_looseTkss(uint64_t digiWord) { return (shapeFlags(digiWord) & 0x2); }  // loose Tk shower shape WP
 
 // brems: not saved in the current emulator
 uint get_brems(uint64_t digiWord) { return ((digiWord >> 53) & 0x3); }
 
-uint passes_standaloneWP(uint64_t digiWord)  { return (passes_iso(digiWord) && passes_ss(digiWord)); }
-uint passes_looseL1TkMatchWP(uint64_t digiWord)  { return (passes_looseTkiso(digiWord) && passes_looseTkss(digiWord)); }
+bool passes_standaloneWP(uint64_t digiWord)  { return (passes_iso(digiWord) && passes_ss(digiWord)); }
+bool passes_looseL1TkMatchWP(uint64_t digiWord)  { return (passes_looseTkiso(digiWord) && passes_looseTkss(digiWord)); }
 
 class L1PFClusterDigiParser : public edm::global::EDProducer<> {
 public:
