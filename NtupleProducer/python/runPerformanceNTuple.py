@@ -627,6 +627,19 @@ def addTkEG(doL1=False, doL2=True, postfix=""):
         tkEleTable.variables.caloEta = LazyVar("egCaloPtr.eta", float,precision=8)
         tkEleTable.variables.caloPhi = LazyVar("egCaloPtr.phi", float,precision=8)
 
+        tkEleTable.variables.in_caloPt = LazyVar('userFloat("in_caloPt")', float,precision=8)
+        tkEleTable.variables.in_caloSS = LazyVar('userFloat("in_caloSS")', float,precision=8)
+        tkEleTable.variables.in_caloRelIso = LazyVar('userFloat("in_caloRelIso")', float,precision=8)
+        tkEleTable.variables.in_caloStaWP = LazyVar('userFloat("in_caloStaWP")', float, precision=8)
+        tkEleTable.variables.in_caloLooseTkWP = LazyVar('userFloat("in_caloLooseTkWP")', float, precision=8)
+        tkEleTable.variables.in_tkChi2RPhi = LazyVar('userFloat("in_tkChi2RPhi")', float, precision=8)
+        tkEleTable.variables.in_tkPtFrac = LazyVar('userFloat("in_tkPtFrac")', float, precision=8)
+        tkEleTable.variables.in_caloTkPtRatio = LazyVar('userFloat("in_caloTkPtRatio")', float, precision=8)
+        tkEleTable.variables.in_caloTkNMatch = LazyVar('userFloat("in_caloTkNMatch")', float, precision=8)
+        tkEleTable.variables.in_caloTkAbsDeta = LazyVar('userFloat("in_caloTkAbsDeta")', float, precision=8)
+        tkEleTable.variables.in_caloTkAbsDphi = LazyVar('userFloat("in_caloTkAbsDphi")', float, precision=8)
+
+
         return tkEmTable, tkEleTable
                                    
     if doL1:    
