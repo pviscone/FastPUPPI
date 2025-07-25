@@ -633,6 +633,7 @@ def addTkEG(doL1=False, doL2=True, postfix=""):
         tkEleTable.variables.in_caloStaWP = LazyVar('userFloat("in_caloStaWP")', float, precision=8)
         tkEleTable.variables.in_caloLooseTkWP = LazyVar('userFloat("in_caloLooseTkWP")', float, precision=8)
         tkEleTable.variables.in_tkChi2RPhi = LazyVar('userFloat("in_tkChi2RPhi")', float, precision=8)
+        tkEleTable.variables.in_hwTkChi2RPhi = LazyVar('userFloat("in_hwTkChi2RPhi")', float, precision=8)
         tkEleTable.variables.in_tkPtFrac = LazyVar('userFloat("in_tkPtFrac")', float, precision=8)
         tkEleTable.variables.in_caloTkPtRatio = LazyVar('userFloat("in_caloTkPtRatio")', float, precision=8)
         tkEleTable.variables.in_caloTkNMatch = LazyVar('userFloat("in_caloTkNMatch")', float, precision=8)
