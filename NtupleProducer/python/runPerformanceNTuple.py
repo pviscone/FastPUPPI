@@ -653,6 +653,7 @@ def addTkEG(doL1=False, doL2=True, postfix=""):
         tkEleTable.variables.scaled_caloTkAbsDphi = LazyVar('userFloat("scaled_caloTkAbsDphi")', float, precision=8)
 
         tkEleTable.variables.hwCaloEta = LazyVar('userFloat("hwCaloEta")', float, precision=8)
+        tkEleTable.variables.ptCorr = LazyVar('userFloat("ptCorr")', float, precision=8)
 
         return tkEmTable, tkEleTable
                                    
