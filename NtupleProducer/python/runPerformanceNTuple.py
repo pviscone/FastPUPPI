@@ -365,6 +365,17 @@ def addTkPtCut(ptCut):
     monitorPerf("L1PuppiTkPt3", "l1tLayer1TkPt3:Puppi")
 
 
+def addLHEPart():
+    process.lheInfoTable = cms.EDProducer("LHETablesProducer",
+        lheInfo = cms.VInputTag(
+            cms.InputTag("externalLHEProducer"),
+            cms.InputTag("source")
+        ),
+        precision = cms.int32(14),
+        storeLHEParticles = cms.bool(True)
+    )
+    process.extraPFStuff.add(process.lheInfoTable)
+
 def addGen(pdgs):
     genLepTable = cms.EDProducer("SimpleGenParticleFlatTableProducer",
                 src = cms.InputTag("genParticles"),
