@@ -438,6 +438,69 @@ def addGenPi(pdgs=[211]):
 def addGenLep(pdgs=[11,13,22]):
     addGen(pdgs)
 
+def addGenPart():
+    from PhysicsTools.PatAlgos.slimming.prunedGenParticles_cfi import prunedGenParticles
+    from PhysicsTools.NanoAOD.genparticles_cff import genParticleTable
+    process.prunedGenParticles = prunedGenParticles.clone()
+    process.genPartTable = genParticleTable.clone(
+        src = cms.InputTag("prunedGenParticles"),
+        externalVariables = cms.PSet(),
+        variables = genParticleTable.variables.clone(
+            vx=Var(
+                "vx()",
+                float,
+                doc="x coordinate of the production vertex position, in cm",
+                precision=10,
+            ),
+            vy=Var(
+                "vy()",
+                float,
+                doc="y coordinate of the production vertex position, in cm",
+                precision=10,
+            ),
+            vz=Var(
+                "vz()",
+                float,
+                doc="z coordinate of the production vertex position, in cm",
+                precision=10,
+            )
+        )
+    )
+    process.extraPFStuff.add(process.prunedGenParticles, process.genPartTable)
+
+def addGenPUPart():
+    from PhysicsTools.NanoAOD.genparticles_cff import genParticleTable
+    process.genPUPartTable = genParticleTable.clone(
+        name= cms.string("GenPUPart"),
+        doc = cms.string("gen particles from pileup interactions"),
+        src = cms.InputTag("puPrunedGenParticles"),
+        cut = cms.string("pt > 0.5 && abs(eta) < 5.0"),
+        externalVariables = cms.PSet(),
+        variables = genParticleTable.variables.clone(
+            vx=Var(
+                "vx()",
+                float,
+                doc="x coordinate of the production vertex position, in cm",
+                precision=10,
+            ),
+            vy=Var(
+                "vy()",
+                float,
+                doc="y coordinate of the production vertex position, in cm",
+                precision=10,
+            ),
+            vz=Var(
+                "vz()",
+                float,
+                doc="z coordinate of the production vertex position, in cm",
+                precision=10,
+            ),
+            bx = Var("collisionId()", int, doc="BX number: 0=in-time PU, non-zero=OOT PU")
+        )
+    )
+    process.extraPFStuff.add(process.genPUPartTable)
+
+
 
 def addStaMu():
     process.staMuTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
