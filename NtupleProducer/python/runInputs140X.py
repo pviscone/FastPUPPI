@@ -79,7 +79,7 @@ process.out = cms.OutputModule("PoolOutputModule",
             "keep *_externalLHEProducer_*_*",
             "keep *_ak4GenJetsNoNu_*_*",
             "keep *_genMetTrue_*_*",
-            "keep *_puPrunedGenParticles_*_*",
+            "keep *_PUGenParticles_*_*",
             # --- Track TPs
             "keep *_l1tTTTracksFromTrackletEmulation_*_*",
             "keep *_l1tTTTracksFromExtendedTrackletEmulation_*_*",

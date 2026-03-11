@@ -468,13 +468,17 @@ def addGenPart():
     )
     process.extraPFStuff.add(process.prunedGenParticles, process.genPartTable)
 
-def addGenPUPart():
+def addGenPUPart(select = ["drop *", "keep collisionId()==0 && pt>1.5 && abs(eta)<2.5 && status==1 && isLastCopy()"]):
     from PhysicsTools.NanoAOD.genparticles_cff import genParticleTable
+    process.finalGenPUParticles = cms.EDProducer(
+        "GenParticlePruner",
+        src = cms.InputTag("GenPUParticles"),
+        select = cms.vstring(select)
+    )
     process.genPUPartTable = genParticleTable.clone(
         name= cms.string("GenPUPart"),
         doc = cms.string("gen particles from pileup interactions"),
-        src = cms.InputTag("puPrunedGenParticles"),
-        cut = cms.string("pt > 0.5 && abs(eta) < 5.0"),
+        src = cms.InputTag("finalGenPUParticles"),
         externalVariables = cms.PSet(),
         variables = genParticleTable.variables.clone(
             vx=Var(
@@ -498,7 +502,7 @@ def addGenPUPart():
             bx = Var("collisionId()", int, doc="BX number: 0=in-time PU, non-zero=OOT PU")
         )
     )
-    process.extraPFStuff.add(process.genPUPartTable)
+    process.extraPFStuff.add(process.finalGenPUParticles, process.genPUPartTable)
 
 
 
